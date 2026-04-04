@@ -3,19 +3,19 @@ export type Verdict = "verified" | "partial" | "inflated" | "missing" | "bonus";
 
 // ─── Claim ──────────────────────────────────────────────────────────────────
 export interface Claim {
-  category: string; // e.g. "Experience", "Skill", "Project", "Extra"
-  text: string; // short human-readable claim
-  quote: string; // verbatim quote from resume
+  category: string;
+  text: string;
+  quote: string;
   verdict: Verdict;
-  confidence: number; // 0–5
-  evidence: string[]; // list of repo / commit references
+  confidence: number;
+  evidence: string[];
 }
 
 // ─── Skill ──────────────────────────────────────────────────────────────────
 export interface Skill {
   name: string;
-  resumePct: number; // self-assessed level (0–100)
-  githubPct: number; // evidence-backed level (0–100)
+  resumePct: number;
+  githubPct: number;
   verdict: Verdict;
 }
 
@@ -24,8 +24,8 @@ export interface Repo {
   name: string;
   lang: string;
   stars: number;
-  months: number; // months of active contribution
-  claimMatches: string[]; // which resume claims this repo supports
+  months: number;
+  claimMatches: string[];
 }
 
 // ─── Flag ───────────────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ export interface Flag {
   desc: string;
 }
 
-// ─── AI Summary (rich text segments) ────────────────────────────────────────
+// ─── AI Summary ──────────────────────────────────────────────────────────────
 export type SummaryPartType =
   | "text"
   | "bold"
@@ -64,7 +64,7 @@ export interface Candidate {
   name: string;
   filename: string;
   github: string;
-  score: number; // 0–100 credibility score
+  score: number;
   verdict: string;
   verdictVariant: "strong" | "moderate" | "weak";
   stats: CandidateStats;

@@ -1,4 +1,4 @@
-import type { Candidate } from "../types";
+import type { Candidate } from "./types";
 
 export const MOCK_CANDIDATES: Candidate[] = [
   {
@@ -345,7 +345,6 @@ export const MOCK_CANDIDATES: Candidate[] = [
   },
 ];
 
-// GitHub usernames cycled when auto-detecting from uploaded files
 export const GH_MOCK_USERS = [
   "kartinul",
   "priya-codes",
