@@ -6,6 +6,7 @@ import { FileUpload } from "./components/FileUpload";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { ResultsView } from "./components/ResultsView";
 import { useFileUpload, useScanFlow } from "./hooks";
+import { downloadFilesAsZip } from "./services/zip";
 import type { Candidate } from "./types";
 
 const App: React.FC = () => {
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const { scanning, scanState, done, runScan } = useScanFlow();
   const [results, setResults] = useState<Candidate[]>([]);
   const [activeId, setActiveId] = useState("");
+  const [decisions, setDecisions] = useState<Record<string, 'accepted' | 'rejected'>>({});
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const handleScan = async () => {
@@ -21,12 +23,25 @@ const App: React.FC = () => {
     setResults(reportResults);
   };
 
+  const handleDownload = () => {
+    const acceptedFiles = results
+      .filter(c => decisions[c.id] === 'accepted')
+      .map(c => c.file)
+      .filter((f): f is File => f !== undefined);
+    
+    if (acceptedFiles.length > 0) {
+      downloadFilesAsZip(acceptedFiles);
+    }
+  };
+
   useEffect(() => {
     if (done && results.length > 0) {
-      setActiveId(results[0].id);
+      if (!activeId) {
+        setActiveId(results[0].id);
+      }
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [done, results]);
+  }, [done, results, activeId]);
 
   return (
     <div style={{ background: colors.bg, color: colors.text, minHeight: "100vh", position: "relative" }}>
@@ -67,7 +82,14 @@ const App: React.FC = () => {
 
         {done && results.length > 0 && (
           <div ref={resultsRef}>
-            <ResultsView candidates={results} activeId={activeId} onSelect={setActiveId} />
+            <ResultsView 
+              candidates={results} 
+              activeId={activeId} 
+              onSelect={setActiveId} 
+              decisions={decisions}
+              onDecide={(id, decision) => setDecisions(prev => ({...prev, [id]: decision}))}
+              onDownload={handleDownload}
+            />
           </div>
         )}
       </div>

@@ -74,6 +74,7 @@ export interface Candidate {
   flags: Flag[];
   summary: SummaryPart[];
   mock?: boolean;
+  file?: File;
 }
 
 // ─── Uploaded File ───────────────────────────────────────────────────────────

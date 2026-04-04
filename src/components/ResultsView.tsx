@@ -3,15 +3,28 @@ import * as Tabs from "@radix-ui/react-tabs";
 import * as Progress from "@radix-ui/react-progress";
 import { colors, fonts } from "../theme";
 import type { Candidate, Claim, Skill, Repo, Flag, SummaryPart } from "../types";
-import { AlertCircle, CheckCircle2, Info, Star, Calendar, GitCommit } from "lucide-react";
+import { AlertCircle, CheckCircle2, Info, Star, Calendar, GitCommit, ChevronLeft, ChevronRight, X, Check, Download } from "lucide-react";
 
 interface ResultsViewProps {
   candidates: Candidate[];
   activeId: string;
   onSelect: (id: string) => void;
+  decisions: Record<string, 'accepted' | 'rejected'>;
+  onDecide: (id: string, decision: 'accepted' | 'rejected') => void;
+  onDownload: () => void;
 }
 
-export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, onSelect }) => {
+export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, onSelect, decisions, onDecide, onDownload }) => {
+  const currentIndex = candidates.findIndex(c => c.id === activeId);
+  const handlePrev = () => {
+    if (currentIndex > 0) onSelect(candidates[currentIndex - 1].id);
+  };
+  const handleNext = () => {
+    if (currentIndex < candidates.length - 1) onSelect(candidates[currentIndex + 1].id);
+  };
+
+  const allDecided = candidates.every(c => decisions[c.id]);
+
   return (
     <div style={{ animation: "fadeIn .6s ease" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
@@ -49,6 +62,8 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
               <span style={{ fontSize: ".62rem", padding: "1px 6px", borderRadius: 10, background: activeId === c.id ? "rgba(88,166,255,.15)" : colors.surface3, color: activeId === c.id ? colors.accent2 : colors.muted }}>
                 {c.score}/100
               </span>
+              {decisions[c.id] === 'accepted' && <Check size={12} color={colors.accent} />}
+              {decisions[c.id] === 'rejected' && <X size={12} color={colors.accent3} />}
             </Tabs.Trigger>
           ))}
         </Tabs.List>
@@ -67,6 +82,63 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
         >
           Start New Audit
         </button>
+      </div>
+
+      {/* Fixed Action Bar */}
+      <div style={{
+        position: 'fixed',
+        bottom: 24,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: colors.surface,
+        border: `1px solid ${colors.border}`,
+        borderRadius: 30,
+        padding: '8px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+        zIndex: 50,
+      }}>
+        <button onClick={handlePrev} disabled={currentIndex <= 0} style={{ background: 'none', border: 'none', color: currentIndex <= 0 ? colors.border : colors.muted, cursor: currentIndex <= 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
+          <ChevronLeft size={20} />
+        </button>
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button 
+            onClick={() => onDecide(activeId, 'rejected')}
+            style={{ 
+              background: decisions[activeId] === 'rejected' ? 'rgba(247,129,102,.15)' : colors.surface2, 
+              border: `1px solid ${decisions[activeId] === 'rejected' ? colors.accent3 : colors.border}`,
+              color: decisions[activeId] === 'rejected' ? colors.accent3 : colors.muted,
+              borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s'
+            }}>
+            <X size={20} />
+          </button>
+          <button 
+            onClick={() => onDecide(activeId, 'accepted')}
+            style={{ 
+              background: decisions[activeId] === 'accepted' ? 'rgba(57,211,83,.15)' : colors.surface2, 
+              border: `1px solid ${decisions[activeId] === 'accepted' ? colors.accent : colors.border}`,
+              color: decisions[activeId] === 'accepted' ? colors.accent : colors.muted,
+              borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s'
+            }}>
+            <Check size={20} />
+          </button>
+        </div>
+
+        <button onClick={handleNext} disabled={currentIndex >= candidates.length - 1} style={{ background: 'none', border: 'none', color: currentIndex >= candidates.length - 1 ? colors.border : colors.muted, cursor: currentIndex >= candidates.length - 1 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
+          <ChevronRight size={20} />
+        </button>
+
+        {allDecided && (
+          <>
+            <div style={{ width: 1, height: 24, background: colors.border }} />
+            <button onClick={onDownload} style={{ background: colors.accent, color: colors.bg, border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: '.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Download size={14} /> Download ZIP
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
