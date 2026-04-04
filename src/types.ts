@@ -73,6 +73,7 @@ export interface Candidate {
   repos: Repo[];
   flags: Flag[];
   summary: SummaryPart[];
+  mock?: boolean;
 }
 
 // ─── Uploaded File ───────────────────────────────────────────────────────────
@@ -83,6 +84,30 @@ export interface UploadedFile {
   github: string | null;
   detecting: boolean;
   file: File;
+}
+
+// ─── GitHub Data ─────────────────────────────────────────────────────────────
+export interface GitHubRepo {
+  name: string;
+  description: string | null;
+  stargazerCount: number;
+  forkCount: number;
+  languages: string[];
+  packageJson?: string | null;
+  requirementsTxt?: string | null;
+  readme?: string | null;
+  url: string;
+  updatedAt: string;
+}
+
+export interface GitHubData {
+  username: string;
+  name?: string | null;
+  bio?: string | null;
+  avatarUrl?: string;
+  repos: GitHubRepo[];
+  linesMap: Record<string, number>;
+  mock?: boolean;
 }
 
 // ─── Scan State ─────────────────────────────────────────────────────────────

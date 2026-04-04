@@ -168,6 +168,26 @@ const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) =
         </div>
       </div>
     </div>
+
+    {/* Mock Data Indicator */}
+    {candidate.mock && (
+      <div style={{ 
+        marginTop: 32, 
+        padding: "8px 12px", 
+        border: `1px solid ${colors.border}`, 
+        borderRadius: 6, 
+        fontSize: ".65rem", 
+        color: colors.muted,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        background: "rgba(255,255,255,.02)",
+        width: "fit-content"
+      }}>
+        <Info size={12} />
+        This report is based on demo data (Mock GitHub/AI response)
+      </div>
+    )}
   </div>
 );
 

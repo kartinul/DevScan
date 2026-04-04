@@ -9,8 +9,28 @@ query getAuditData($login: String!) {
         description
         stargazerCount
         forkCount
-        primaryLanguage {
-          name
+        languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+          edges {
+            size
+            node {
+              name
+            }
+          }
+        }
+        packageJson: object(expression: "HEAD:package.json") {
+          ... on Blob {
+            text
+          }
+        }
+        requirementsTxt: object(expression: "HEAD:requirements.txt") {
+          ... on Blob {
+            text
+          }
+        }
+        readme: object(expression: "HEAD:README.md") {
+          ... on Blob {
+            text
+          }
         }
         url
         updatedAt

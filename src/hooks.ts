@@ -39,9 +39,12 @@ export function useFileUpload() {
     });
   }, []);
 
-  const removeFile = (id: number) => setFiles((prev) => prev.filter((f) => f.id !== id));
+  const removeFile = (id: number) =>
+    setFiles((prev) => prev.filter((f) => f.id !== id));
   const editGH = (id: number, username: string) =>
-    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, github: username } : f)));
+    setFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, github: username } : f)),
+    );
 
   const readyFiles = useMemo(() => files.filter((f) => !f.detecting), [files]);
 
@@ -67,34 +70,38 @@ export function useScanFlow() {
     totalFiles: 0,
   });
 
-  const runScan = useCallback(async (uploadedFiles: UploadedFile[]): Promise<Candidate[]> => {
-    setScanning(true);
-    setDone(false);
-    const results: Candidate[] = [];
+  const runScan = useCallback(
+    async (uploadedFiles: UploadedFile[]): Promise<Candidate[]> => {
+      setScanning(true);
+      setDone(false);
+      const results: Candidate[] = [];
 
-    for (let fi = 0; fi < uploadedFiles.length; fi++) {
-      const uFile = uploadedFiles[fi];
-      setScanState({
-        fileIndex: fi,
-        currentFile: uFile.name,
-        currentStep: 0,
-        totalFiles: uploadedFiles.length,
-      });
+      for (let fi = 0; fi < uploadedFiles.length; fi++) {
+        const uFile = uploadedFiles[fi];
+        setScanState({
+          fileIndex: fi,
+          currentFile: uFile.name,
+          currentStep: 0,
+          totalFiles: uploadedFiles.length,
+        });
 
-      const auditResult = await performFullAudit(
-        uFile.file, 
-        uFile.github || "unknown", 
-        fi, 
-        (stepIndex) => setScanState((prev) => ({ ...prev, currentStep: stepIndex }))
-      );
-      
-      results.push(auditResult);
-    }
+        const auditResult = await performFullAudit(
+          uFile.file,
+          uFile.github || "unknown",
+          fi,
+          (stepIndex) =>
+            setScanState((prev) => ({ ...prev, currentStep: stepIndex })),
+        );
 
-    setScanning(false);
-    setDone(true);
-    return results;
-  }, []);
+        results.push(auditResult);
+      }
+
+      setScanning(false);
+      setDone(true);
+      return results;
+    },
+    [],
+  );
 
   return { scanning, scanState, done, runScan };
 }

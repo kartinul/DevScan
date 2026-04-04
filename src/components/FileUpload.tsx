@@ -64,7 +64,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, onFiles, onRemove
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf"
           multiple
           onChange={(e) => { if (e.target.files?.length) onFiles(e.target.files); e.target.value = ""; }}
           style={{ display: "none" }}
@@ -74,7 +74,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ files, onFiles, onRemove
           Drop resumes here
         </div>
         <div style={{ fontSize: ".74rem", color: colors.muted }}>
-          <strong style={{ color: colors.accent }}>PDF, DOCX supported</strong>
+          <strong style={{ color: colors.accent }}>PDF only</strong>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ export const MOCK_CANDIDATES: Candidate[] = [
     id: "kartik",
     name: "Kartik Sharma",
     filename: "kartik_sharma_resume.pdf",
-    github: "kartikdev",
+    github: "kartinul",
     score: 78,
     verdict: "Strong Signal",
     verdictVariant: "strong",
@@ -194,9 +194,9 @@ export const MOCK_CANDIDATES: Candidate[] = [
 
   {
     id: "priya",
-    name: "Priya Mehta",
-    filename: "priya_mehta_cv.pdf",
-    github: "priya-codes",
+    name: "Sohal",
+    filename: "sohal.pdf",
+    github: "sohal-singh",
     score: 91,
     verdict: "Excellent Signal",
     verdictVariant: "strong",
