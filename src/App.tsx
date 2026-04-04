@@ -6,34 +6,24 @@ import { FileUpload } from "./components/FileUpload";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { ResultsView } from "./components/ResultsView";
 import { useFileUpload, useScanFlow } from "./hooks";
-import { MOCK_CANDIDATES } from "./data";
-import type { UploadedFile } from "./types";
+import type { Candidate } from "./types";
 
 const App: React.FC = () => {
   const { files, addFiles, removeFile, editGH, readyFiles } = useFileUpload();
   const { scanning, scanState, done, runScan } = useScanFlow();
+  const [results, setResults] = useState<Candidate[]>([]);
   const [activeId, setActiveId] = useState("");
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const handleScan = async () => {
     if (readyFiles.length === 0) return;
-    await runScan(readyFiles.map((f: UploadedFile) => f.name));
+    const reportResults = await runScan(readyFiles);
+    setResults(reportResults);
   };
 
-  const results = readyFiles.map((f: UploadedFile, i: number) => {
-    const mock = MOCK_CANDIDATES[i % MOCK_CANDIDATES.length];
-    return {
-      ...mock,
-      id: `${mock.id}-${f.id}`,
-      name: f.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ").toUpperCase(),
-      filename: f.name,
-      github: f.github || mock.github,
-    };
-  });
-
   useEffect(() => {
-    if (done) {
-      if (results.length > 0) setActiveId(results[0].id);
+    if (done && results.length > 0) {
+      setActiveId(results[0].id);
       resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [done, results]);
@@ -75,7 +65,7 @@ const App: React.FC = () => {
           </>
         )}
 
-        {done && (
+        {done && results.length > 0 && (
           <div ref={resultsRef}>
             <ResultsView candidates={results} activeId={activeId} onSelect={setActiveId} />
           </div>

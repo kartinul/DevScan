@@ -1,16 +1,9 @@
 import { useState, useCallback, useMemo } from "react";
-import type { UploadedFile, ScanState } from "./types";
-import { GH_MOCK_USERS } from "./data";
+import type { UploadedFile, ScanState, Candidate } from "./types";
+import { detectGitHubUser } from "./services/github";
+import { performFullAudit } from "./services/audit";
 
 // ─── File Upload Hook ────────────────────────────────────────────────────────
-const detectGitHub = (fileIndex: number, delay: number): Promise<string> =>
-  new Promise((resolve) =>
-    setTimeout(
-      () => resolve(GH_MOCK_USERS[fileIndex % GH_MOCK_USERS.length]),
-      delay,
-    ),
-  );
-
 export function useFileUpload() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
 
@@ -28,12 +21,13 @@ export function useFileUpload() {
           size: f.size,
           github: null,
           detecting: true,
+          file: f,
         }));
       return [...prev, ...newFiles];
     });
 
     incoming.forEach((f, offset) => {
-      detectGitHub(offset, 900 + Math.random() * 700).then((username) => {
+      detectGitHubUser(f, offset).then((username) => {
         setFiles((prev) =>
           prev.map((item) =>
             item.name === f.name && item.detecting
@@ -63,8 +57,6 @@ export const SCAN_STEPS = [
   "Generate credibility report",
 ];
 
-const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
-
 export function useScanFlow() {
   const [scanning, setScanning] = useState(false);
   const [done, setDone] = useState(false);
@@ -75,27 +67,33 @@ export function useScanFlow() {
     totalFiles: 0,
   });
 
-  const runScan = useCallback(async (fileNames: string[]) => {
+  const runScan = useCallback(async (uploadedFiles: UploadedFile[]): Promise<Candidate[]> => {
     setScanning(true);
     setDone(false);
+    const results: Candidate[] = [];
 
-    for (let fi = 0; fi < fileNames.length; fi++) {
+    for (let fi = 0; fi < uploadedFiles.length; fi++) {
+      const uFile = uploadedFiles[fi];
       setScanState({
         fileIndex: fi,
-        currentFile: fileNames[fi],
+        currentFile: uFile.name,
         currentStep: 0,
-        totalFiles: fileNames.length,
+        totalFiles: uploadedFiles.length,
       });
 
-      for (let si = 0; si < SCAN_STEPS.length; si++) {
-        setScanState((prev) => ({ ...prev, currentStep: si }));
-        await wait(480 + Math.random() * 280);
-      }
+      const auditResult = await performFullAudit(
+        uFile.file, 
+        uFile.github || "unknown", 
+        fi, 
+        (stepIndex) => setScanState((prev) => ({ ...prev, currentStep: stepIndex }))
+      );
+      
+      results.push(auditResult);
     }
 
-    await wait(300);
     setScanning(false);
     setDone(true);
+    return results;
   }, []);
 
   return { scanning, scanState, done, runScan };

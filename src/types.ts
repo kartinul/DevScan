@@ -82,6 +82,7 @@ export interface UploadedFile {
   size: number;
   github: string | null;
   detecting: boolean;
+  file: File;
 }
 
 // ─── Scan State ─────────────────────────────────────────────────────────────
