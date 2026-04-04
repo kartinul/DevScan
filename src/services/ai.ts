@@ -82,7 +82,10 @@ export async function analyzeWithAI(
       summary: [
         { type: "bold", content: "Prompt Debug:" },
         { type: "break" },
-        { type: "text", content: finalPrompt.substring(0, 3000) + "\n...[TRUNCATED]" },
+        {
+          type: "text",
+          content: finalPrompt.substring(0, 3000) + "\n...[TRUNCATED]",
+        },
       ],
       mock: true,
     };
@@ -92,21 +95,26 @@ export async function analyzeWithAI(
 // ─── Shared OpenRouter fetch helper ─────────────────────────────────────────
 async function askOpenRouter(prompt: string, model: string): Promise<string> {
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+  const response = await fetch(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: prompt }],
+      }),
     },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
+  );
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(`OpenRouter error ${response.status}: ${error.error?.message ?? "Unknown error"}`);
+    throw new Error(
+      `OpenRouter error ${response.status}: ${error.error?.message ?? "Unknown error"}`,
+    );
   }
 
   const data = await response.json();
@@ -141,4 +149,3 @@ console.log("GPT-OSS 120B:  ", gpt);
 console.log("Liquid Thinking:", liquid);
 console.log("Qwen3.6 Plus:  ", qwen);
 */
-

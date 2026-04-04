@@ -1,6 +1,6 @@
 import { Candidate } from "../types";
 import { fetchGitHubData } from "./github";
-import { analyzeWithAI } from "./ai";
+import { analyzeWithAI, askGptOSS, askLiquidThinking, askQwen } from "./ai";
 import { extractTextFromFile } from "./ocr";
 import { askChatGPT, askGemini, askGroq } from "./aiEngine";
 
@@ -15,8 +15,8 @@ export async function performFullAudit(
 ): Promise<Candidate> {
   // const res = await askChatGPT("hi");
   // const res = await askGemini("hi");
-  const res = await askGroq("hi");
-  console.log(res);
+  // const res = await askQwen("hi");
+  // console.log(res);
 
   // console.log(gqtest);
 
