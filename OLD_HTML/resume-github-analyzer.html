@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevScan — Claims Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#090c10;--surface:#0d1117;--surface2:#161b22;--surface3:#1c2128;
+  --border:#21262d;--border2:#30363d;
+  --accent:#39d353;--accent2:#58a6ff;--accent3:#f78166;--accent4:#d2a8ff;
+  --text:#e6edf3;--muted:#7d8590;--warn:#e3b341;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(57,211,83,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(57,211,83,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 24px 100px}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 20px;border-bottom:1px solid var(--border);margin-bottom:48px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-.5px}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:6px;display:grid;place-items:center;font-size:16px}
+.logo span{color:var(--accent)}
+.badge{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:.7rem;padding:4px 10px;border-radius:20px;letter-spacing:.05em}
+
+/* HERO */
+.hero{text-align:center;margin-bottom:48px}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.9rem,4.5vw,3.2rem);font-weight:800;line-height:1.1;letter-spacing:-1px;margin-bottom:14px}
+.hero h1 em{color:var(--accent);font-style:normal}
+.hero p{color:var(--muted);font-size:.82rem;line-height:1.8;max-width:560px;margin:0 auto}
+
+/* UPLOAD */
+.upload-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px}
+.panel-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:10px;padding:44px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(57,211,83,.04)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:2.2rem;margin-bottom:12px}
+.upload-zone h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:6px}
+.upload-zone p{font-size:.75rem;color:var(--muted);line-height:1.7}
+.upload-zone strong{color:var(--accent)}
+
+/* FILE QUEUE */
+.file-queue{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.file-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.file-ext{width:36px;height:36px;border-radius:6px;background:var(--surface3);border:1px solid var(--border);display:grid;place-items:center;font-size:.63rem;font-weight:700;letter-spacing:.05em;color:var(--accent2);flex-shrink:0}
+.file-info{min-width:0}
+.file-name-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.file-name{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.gh-badge{display:none;align-items:center;gap:5px;background:rgba(57,211,83,.1);border:1px solid rgba(57,211,83,.25);border-radius:4px;padding:2px 8px;font-size:.64rem;color:var(--accent);animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.gh-badge.show{display:inline-flex}
+.file-meta{font-size:.67rem;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status-chip{font-size:.63rem;padding:2px 8px;border-radius:10px;background:var(--surface3);border:1px solid var(--border);color:var(--muted)}
+.status-chip.detecting{color:var(--warn);border-color:rgba(227,179,65,.3);animation:blinkOp 1.2s ease infinite}
+.status-chip.ready{color:var(--accent);border-color:rgba(57,211,83,.3)}
+@keyframes blinkOp{0%,100%{opacity:1}50%{opacity:.5}}
+.edit-gh-btn{background:none;border:none;color:var(--muted);font-family:inherit;font-size:.66rem;cursor:pointer;padding:0;display:flex;align-items:center;gap:3px;transition:color .15s}
+.edit-gh-btn:hover{color:var(--accent2)}
+.edit-gh-input{background:var(--surface3);border:1px solid var(--accent2);border-radius:4px;color:var(--text);font-family:inherit;font-size:.75rem;padding:3px 8px;outline:none;width:130px}
+.remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px;line-height:1;transition:color .15s;flex-shrink:0}
+.remove-btn:hover{color:var(--accent3)}
+
+/* SCAN */
+.scan-wrap{text-align:center;margin:28px 0 56px}
+.scan-btn{background:var(--accent);color:#090c10;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;padding:14px 44px;cursor:pointer;letter-spacing:.02em;transition:all .2s;position:relative;overflow:hidden}
+.scan-btn:disabled{opacity:.35;cursor:not-allowed}
+.scan-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .4s}
+.scan-btn:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(57,211,83,.3)}
+.scan-btn:not(:disabled):hover::after{transform:translateX(100%)}
+.scan-count{font-size:.72rem;color:var(--muted);margin-top:10px}
+
+/* LOADING */
+#loading{display:none;position:fixed;inset:0;background:rgba(9,12,16,.94);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:22px;backdrop-filter:blur(8px)}
+#loading.active{display:flex}
+.loader-ring{width:52px;height:52px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-file{font-size:.7rem;color:var(--accent2);margin-bottom:2px;text-align:center}
+.loader-steps{font-size:.75rem;line-height:2.2;min-width:240px}
+.loader-step{color:var(--muted);transition:color .3s}
+.loader-step.active{color:var(--text)}
+.loader-step.active::before{content:'› '}
+.loader-step.done{color:var(--accent)}
+.loader-step.done::before{content:'✓ '}
+
+/* RESULTS */
+#results-section{display:none}
+.results-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.results-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;display:flex;align-items:center;gap:12px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* TABS */
+.cand-tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.cand-tab{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:.75rem;display:flex;align-items:center;gap:8px;transition:all .15s}
+.cand-tab:hover{border-color:var(--border2)}
+.cand-tab.active{border-color:var(--accent2);background:rgba(88,166,255,.08);color:var(--accent2)}
+.score-badge{font-size:.64rem;padding:1px 6px;border-radius:10px;background:var(--surface3)}
+.cand-tab.active .score-badge{background:rgba(88,166,255,.15);color:var(--accent2)}
+.cand-panel{display:none}
+.cand-panel.active{display:block}
+
+/* TOP SCORE */
+.top-score-bar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:22px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
+.score-meta{font-size:.67rem;color:var(--muted);margin-bottom:10px;display:flex;gap:16px;flex-wrap:wrap}
+.big-num{font-family:'Syne',sans-serif;font-weight:800;font-size:2.8rem;color:var(--accent);line-height:1}
+.big-num span{font-size:1.2rem;color:var(--muted)}
+.big-label{font-size:.67rem;color:var(--muted);margin-top:4px}
+.score-track-row{margin-top:14px}
+.track-labels{display:flex;justify-content:space-between;font-size:.63rem;color:var(--muted);margin-bottom:5px}
+.track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.track-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.verdict-big{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:5px}
+.verdict-big.strong{color:var(--accent)}
+.verdict-big.moderate{color:var(--warn)}
+.verdict-big.weak{color:var(--accent3)}
+.gh-link-sm{font-size:.7rem;color:var(--accent2);text-decoration:none;display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:4px}
+.gh-link-sm:hover{text-decoration:underline}
+
+/* SECTION TITLE */
+.sec-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-count{font-size:.7rem;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1px 8px;font-family:'JetBrains Mono',monospace;font-weight:400;color:var(--muted)}
+
+/* CLAIMS TABLE */
+.claims-wrap{overflow-x:auto;margin-bottom:24px}
+.claims-table{width:100%;border-collapse:collapse;min-width:640px}
+.claims-table th{font-size:.61rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+.claims-table td{padding:12px 12px;border-bottom:1px solid rgba(33,38,45,.5);font-size:.76rem;vertical-align:top}
+.claims-table tr:last-child td{border-bottom:none}
+.claims-table tr:hover td{background:rgba(255,255,255,.013)}
+.cat-pill{font-size:.6rem;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--muted);margin-bottom:5px;display:inline-block}
+.claim-main{line-height:1.5;margin-bottom:3px}
+.claim-quote{font-size:.67rem;color:var(--muted);font-style:italic;line-height:1.4}
+.ev-item{font-size:.71rem;display:flex;align-items:flex-start;gap:5px;margin-bottom:4px;color:var(--muted);line-height:1.5}
+.ev-item:last-child{margin-bottom:0}
+.ev-link{color:var(--accent2);cursor:pointer}
+.ev-link:hover{text-decoration:underline}
+.no-ev{font-size:.71rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.conf-dots{display:flex;gap:3px}
+.conf-dot{width:8px;height:8px;border-radius:50%;background:var(--surface2)}
+.conf-dot.on-green{background:var(--accent)}
+.conf-dot.on-warn{background:var(--warn)}
+.conf-dot.on-red{background:var(--accent3)}
+.v-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.66rem;border:1px solid;white-space:nowrap}
+.vv{color:var(--accent);border-color:rgba(57,211,83,.3);background:rgba(57,211,83,.07)}
+.vp{color:var(--warn);border-color:rgba(227,179,65,.3);background:rgba(227,179,65,.06)}
+.vi{color:var(--accent3);border-color:rgba(247,129,102,.3);background:rgba(247,129,102,.06)}
+.vm{color:var(--muted);border-color:var(--border);background:transparent}
+.vb{color:var(--accent4);border-color:rgba(210,168,255,.3);background:rgba(210,168,255,.06)}
+
+/* AI SUMMARY */
+.ai-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:22px;opacity:0;transform:translateY(12px);transition:opacity .5s .35s,transform .5s .35s}
+.ai-box.visible{opacity:1;transform:none}
+.ai-body{font-size:.79rem;line-height:1.95;color:var(--muted)}
+.ai-body strong{color:var(--text)}
+.hl-g{color:var(--accent)}
+.hl-r{color:var(--accent3)}
+.hl-w{color:var(--warn)}
+.cursor{display:inline-block;width:7px;height:13px;background:var(--accent);animation:blink .9s step-start infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* LOWER GRID */
+.lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.card.visible{opacity:1;transform:none}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+/* Skill rows */
+.skill-rows{display:flex;flex-direction:column;gap:9px}
+.skill-row{display:flex;align-items:center;gap:10px}
+.s-name{font-size:.72rem;width:88px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.s-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.s-pct{font-size:.66rem;width:30px;text-align:right;flex-shrink:0}
+.s-v{font-size:.59rem;width:52px;text-align:right;flex-shrink:0}
+
+/* Repos */
+.repo-list{display:flex;flex-direction:column;gap:9px}
+.repo-row{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 13px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.r-name{font-size:.77rem;color:var(--accent2);margin-bottom:3px}
+.r-sub{font-size:.64rem;color:var(--muted)}
+.r-tags{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.r-tag{font-size:.59rem;padding:2px 7px;border-radius:10px;background:var(--surface3);border:1px solid var(--border);color:var(--muted)}
+.r-tag.m{color:var(--accent);border-color:rgba(57,211,83,.3)}
+
+/* Heatmap */
+.heatmap{display:grid;grid-template-columns:repeat(26,1fr);gap:2.5px}
+.hm{aspect-ratio:1;border-radius:2px;background:var(--surface2)}
+.hm.l1{background:#0e4429}.hm.l2{background:#006d32}.hm.l3{background:#26a641}.hm.l4{background:#39d353}
+.hm-sub{font-size:.62rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between}
+.stat-row{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
+.stat{font-size:.69rem;color:var(--muted)}
+.stat strong{color:var(--text)}
+
+/* Flags */
+.flag-list{display:flex;flex-direction:column;gap:8px}
+.flag-item{display:flex;align-items:flex-start;gap:10px;background:var(--surface2);border-radius:8px;padding:11px 13px;border-left:3px solid;font-size:.74rem;line-height:1.5}
+.flag-item.r{border-color:var(--accent3)}
+.flag-item.g{border-color:var(--accent)}
+.flag-item.w{border-color:var(--warn)}
+.flag-icon{font-size:.95rem;flex-shrink:0;margin-top:1px}
+.flag-title{font-weight:600;margin-bottom:2px}
+.flag-desc{font-size:.67rem;color:var(--muted);line-height:1.6}
+
+@media(max-width:680px){
+  .lower-grid{grid-template-columns:1fr}
+  .hero h1{font-size:1.8rem}
+  .top-score-bar{grid-template-columns:1fr}
+  .gh-link-sm{justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loader-ring"></div>
+  <div>
+    <div class="loader-file" id="ld-file"></div>
+    <div class="loader-steps">
+      <div class="loader-step" id="ls0">Parse resume &amp; extract all claims</div>
+      <div class="loader-step" id="ls1">Auto-detect GitHub from resume</div>
+      <div class="loader-step" id="ls2">Fetch repos, commits &amp; history</div>
+      <div class="loader-step" id="ls3">Cross-reference every claim</div>
+      <div class="loader-step" id="ls4">Generate credibility report</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo"><div class="logo-icon">⌬</div>Dev<span>Scan</span></div>
+    <div class="badge">CLAIMS AUDIT v0.2</div>
+  </header>
+
+  <div class="hero">
+    <h1>What you <em>claim</em>.<br>What GitHub <em>proves</em>.</h1>
+    <p>Drop one or many resumes. DevScan auto-detects each candidate's GitHub from their resume, then audits every claim — skills, years of experience, projects, scale — against real commit evidence.</p>
+  </div>
+
+  <div class="upload-panel">
+    <div class="panel-label">Resumes — drop multiple files at once</div>
+    <div class="upload-zone" id="dropzone">
+      <input type="file" id="fileInput" accept=".pdf,.doc,.docx" multiple onchange="handleFiles(event)">
+      <div class="upload-icon">📂</div>
+      <h3>Drop resumes here</h3>
+      <p><strong>Multiple files supported</strong> · PDF, DOCX, DOC<br>GitHub username auto-detected from each resume</p>
+    </div>
+    <div class="file-queue" id="fileQueue"></div>
+  </div>
+
+  <div class="scan-wrap">
+    <button class="scan-btn" id="scanBtn" onclick="runScan()" disabled>⌬ &nbsp;Audit All Resumes</button>
+    <div class="scan-count" id="scanCount"></div>
+  </div>
+
+  <div id="results-section">
+    <div class="results-hd">
+      <div class="results-title"><div class="live-dot"></div>Claims Audit Report</div>
+      <div style="font-size:.7rem;color:var(--muted)" id="res-ts"></div>
+    </div>
+    <div class="cand-tabs" id="cTabs"></div>
+    <div id="cPanels"></div>
+  </div>
+</div>
+
+<script>
+// ── MOCK DATA ──────────────────────────────────────────────────────
+const CANDIDATES = [
+  {
+    name:'Kartik Sharma', file:'kartik_sharma_resume.pdf',
+    github:'kartikdev', ghDetected:true,
+    score:78, verdict:'Strong Signal', verdictCls:'strong',
+    commits:847, repos:12, stars:234, activeMo:18,
+    claims:[
+      {cat:'Experience', text:'3+ years React',
+       quote:'"3+ years of professional React experience in production"',
+       v:'verified', conf:5,
+       ev:['ecomm-dashboard (26 months of commits)','ecomm-ui (11 months)','340+ React commits across repos']},
+      {cat:'Skill', text:'TypeScript — Expert level',
+       quote:'"Expert-level TypeScript"',
+       v:'partial', conf:3,
+       ev:['38% of code is TypeScript','Mostly typed JSX props — few advanced generics or complex types found']},
+      {cat:'Skill', text:'Python / FastAPI',
+       quote:'"Python backend development with FastAPI"',
+       v:'verified', conf:4,
+       ev:['ml-data-pipeline (FastAPI, 8 months active)','scraper-toolkit (Python, 4 months)']},
+      {cat:'Skill', text:'Kubernetes & Terraform',
+       quote:'"Proficient in Kubernetes and Terraform"',
+       v:'missing', conf:0, ev:[]},
+      {cat:'Project', text:'E-commerce platform — 50k users',
+       quote:'"Architected platform serving 50,000+ monthly users"',
+       v:'inflated', conf:2,
+       ev:['ecomm-dashboard exists (★48, solo)','No load config, analytics, or infra code found','README has no scale mention']},
+      {cat:'Skill', text:'GraphQL API design',
+       quote:'"GraphQL API design and implementation"',
+       v:'partial', conf:2,
+       ev:['1 repo uses Apollo Client (consumer only)','No backend schema or resolver code authored']},
+      {cat:'Extra', text:'Rust (not on resume)',
+       quote:'— Not mentioned in resume —',
+       v:'bonus', conf:5,
+       ev:['cli-todo-rust (★82, 6 months active)','Shows initiative beyond day-job stack']},
+      {cat:'Experience', text:'Led team of 5 engineers',
+       quote:'"Led cross-functional team of 5 engineers"',
+       v:'missing', conf:0,
+       ev:['All repos: solo or 2 contributors max','No PR review history found']},
+    ],
+    skills:[
+      {n:'React',rp:95,gp:88,v:'verified'},
+      {n:'TypeScript',rp:90,gp:62,v:'partial'},
+      {n:'Python',rp:80,gp:76,v:'verified'},
+      {n:'Node.js',rp:75,gp:55,v:'partial'},
+      {n:'GraphQL',rp:70,gp:18,v:'inflated'},
+      {n:'Kubernetes',rp:65,gp:0,v:'missing'},
+    ],
+    repos:[
+      {n:'ecomm-dashboard',l:'TypeScript',s:48,mo:26,m:['React','TypeScript']},
+      {n:'ml-data-pipeline',l:'Python',s:17,mo:8,m:['Python','FastAPI']},
+      {n:'cli-todo-rust',l:'Rust',s:82,mo:6,m:[]},
+    ],
+    flags:[
+      {t:'r',icon:'🚩',title:'Scale claim unverifiable',desc:'50k-user claim has no backing — no analytics integration, CDN config, or infra code in any repo.'},
+      {t:'r',icon:'🚩',title:'Team lead claim unsupported',desc:'All public repos are solo or 2-person max. Zero PR review history to external contributors.'},
+      {t:'w',icon:'⚠️',title:'TypeScript depth shallower than "expert"',desc:'Claim doesn\'t match code patterns — mostly typed props, minimal advanced utility types or generics.'},
+      {t:'g',icon:'✅',title:'Unprompted Rust (★82)',desc:'CLI tool with 82 stars not on resume — signals initiative and shipping instinct beyond stated skills.'},
+    ],
+    summary:`<strong>Kartik</strong> is a <span class="hl-g">credible mid-level fullstack developer</span> whose GitHub broadly supports the core resume claims — but with meaningful gaps. React and Python are <span class="hl-g">well-evidenced</span> across multiple repos and 26+ months of consistent commits.<br><br><span class="hl-r">Kubernetes, Terraform, and the "team lead" claims have zero GitHub evidence.</span> The 50k-user project claim appears inflated — the repo exists but has no scale indicators. <span class="hl-w">TypeScript is present but shallower than "expert" implies.</span><br><br>Notable upside: an unprompted Rust project with 82 stars suggests genuine curiosity and shipping ability beyond the day job. <span class="cursor"></span>`
+  },
+  {
+    name:'Priya Mehta', file:'priya_mehta_cv.pdf',
+    github:'priya-codes', ghDetected:true,
+    score:91, verdict:'Excellent Signal', verdictCls:'strong',
+    commits:1240, repos:22, stars:610, activeMo:30,
+    claims:[
+      {cat:'Skill', text:'ML Engineering — PyTorch & HuggingFace',
+       quote:'"3 years ML engineering with PyTorch and HuggingFace"',
+       v:'verified', conf:5,
+       ev:['bert-finetuner (PyTorch, 14 months, ★210)','vision-clf (★210, HuggingFace)','600+ ML-related commits across 3 years']},
+      {cat:'Experience', text:'5+ years Python',
+       quote:'"5+ years Python development"',
+       v:'verified', conf:5,
+       ev:['GitHub account 5.5 years old','Python present throughout entire history — no gap']},
+      {cat:'Project', text:'Open source contributor',
+       quote:'"Active open source contributor"',
+       v:'verified', conf:5,
+       ev:['47 PRs merged to external repos','Contributions to scikit-learn and transformers (HuggingFace)']},
+      {cat:'Skill', text:'AWS SageMaker / MLOps',
+       quote:'"AWS SageMaker and MLOps pipeline experience"',
+       v:'partial', conf:2,
+       ev:['1 repo references boto3','No SageMaker config, Step Functions, or pipeline orchestration found']},
+      {cat:'Skill', text:'Docker & CI/CD',
+       quote:'"Dockerized microservices with CI/CD pipelines"',
+       v:'verified', conf:4,
+       ev:['Dockerfiles in 8 repos','GitHub Actions workflows in 11 repos']},
+      {cat:'Skill', text:'React / Frontend',
+       quote:'"React frontend development"',
+       v:'verified', conf:3,
+       ev:['3 repos use React (personal projects)','Frontend is secondary skill — consistent with claim framing']},
+    ],
+    skills:[
+      {n:'Python',rp:95,gp:92,v:'verified'},
+      {n:'PyTorch',rp:90,gp:85,v:'verified'},
+      {n:'Docker',rp:80,gp:78,v:'verified'},
+      {n:'AWS/MLOps',rp:75,gp:28,v:'partial'},
+      {n:'React',rp:50,gp:45,v:'verified'},
+    ],
+    repos:[
+      {n:'bert-finetuner',l:'Python',s:210,mo:14,m:['PyTorch','ML']},
+      {n:'vision-clf',l:'Python',s:210,mo:10,m:['PyTorch','HuggingFace']},
+      {n:'data-eng-toolkit',l:'Python',s:88,mo:18,m:['Python','Docker']},
+    ],
+    flags:[
+      {t:'w',icon:'⚠️',title:'AWS/MLOps depth unclear',desc:'Stated as core competency but only boto3 references found. SageMaker and orchestration pipelines absent.'},
+      {t:'g',icon:'✅',title:'Exceptional open source record',desc:'47 merged PRs to scikit-learn and HuggingFace transformers is rare and extremely high-signal.'},
+      {t:'g',icon:'✅',title:'30-month consistent streak',desc:'No activity gap > 2 weeks across entire visible history. Extremely consistent contributor pattern.'},
+    ],
+    summary:`<strong>Priya</strong> is a <span class="hl-g">highly credible ML engineer</span> — one of the stronger profiles we've audited. Python and PyTorch claims are <span class="hl-g">deeply backed</span> with years of commit history, two 200+ star repos, and real contributions to major libraries.<br><br><span class="hl-w">AWS/MLOps is the one soft spot:</span> stated as a core competency but barely visible in public code. Worth probing in interview. Docker and CI/CD are solid.<br><br>Resume actually <em>undersells</em> rather than oversells — her open source footprint is stronger than the resume communicates. Strong hire signal. <span class="cursor"></span>`
+  }
+];
+
+// ── FILES ─────────────────────────────────────────────────────────
+let files = []; // {name, size, gh, detecting, removed}
+
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('dragover')});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('dragover');addFiles(e.dataTransfer.files)});
+function handleFiles(e){addFiles(e.target.files);e.target.value=''}
+
+const GH_MOCK = ['kartikdev','priya-codes','rahul-m','ananya42','sid-codes'];
+
+function addFiles(list){
+  [...list].forEach(f=>{
+    if(files.find(u=>u&&u.name===f.name)) return;
+    const idx=files.length;
+    files.push({name:f.name,size:f.size,gh:null,detecting:true,removed:false});
+    renderCard(idx);
+    // Simulate auto-detection
+    setTimeout(()=>{
+      if(!files[idx]||files[idx].removed) return;
+      files[idx].gh = GH_MOCK[idx % GH_MOCK.length];
+      files[idx].detecting = false;
+      updateCard(idx);
+    }, 800 + Math.random()*700);
+  });
+  refreshBtn();
+}
+
+function renderCard(idx){
+  const f = files[idx];
+  const ext = f.name.split('.').pop().toUpperCase();
+  const kb = (f.size/1024).toFixed(0)||'?';
+  const q = document.getElementById('fileQueue');
+  const d = document.createElement('div');
+  d.className='file-card'; d.id='fc-'+idx;
+  d.innerHTML=`
+    <div class="file-ext">${ext}</div>
+    <div class="file-info">
+      <div class="file-name-row">
+        <span class="file-name">${f.name}</span>
+        <span class="gh-badge" id="ghb-${idx}">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span id="ghn-${idx}"></span>
+        </span>
+      </div>
+      <div class="file-meta" id="fm-${idx}">
+        <span class="status-chip detecting">Detecting GitHub…</span>
+        <span>${kb} KB</span>
+      </div>
+    </div>
+    <button class="remove-btn" onclick="removeFile(${idx})" title="Remove">✕</button>`;
+  q.appendChild(d);
+}
+
+function updateCard(idx){
+  const f=files[idx];
+  if(!f||f.removed) return;
+  const badge=document.getElementById('ghb-'+idx);
+  const meta=document.getElementById('fm-'+idx);
+  const ghn=document.getElementById('ghn-'+idx);
+  const kb=(f.size/1024).toFixed(0)||'?';
+  if(f.gh){
+    badge.classList.add('show');
+    ghn.textContent=f.gh;
+    meta.innerHTML=`<span class="status-chip ready">Ready</span><span>${kb} KB</span><button class="edit-gh-btn" onclick="editGH(${idx})">✎ edit</button>`;
+  }
+  refreshBtn();
+}
+
+function editGH(idx){
+  const f=files[idx]; if(!f) return;
+  const meta=document.getElementById('fm-'+idx);
+  meta.innerHTML=`<input class="edit-gh-input" id="gei-${idx}" value="${f.gh||''}" placeholder="github username" onblur="saveGH(${idx})" onkeydown="if(event.key==='Enter')this.blur()">`;
+  document.getElementById('gei-'+idx).focus();
+}
+function saveGH(idx){
+  const inp=document.getElementById('gei-'+idx); if(!inp) return;
+  files[idx].gh=inp.value.trim();
+  updateCard(idx);
+}
+function removeFile(idx){
+  const el=document.getElementById('fc-'+idx);
+  if(el){el.style.opacity='0';el.style.transform='translateX(8px)';el.style.transition='all .2s';setTimeout(()=>el.remove(),200)}
+  if(files[idx]) files[idx].removed=true;
+  refreshBtn();
+}
+function refreshBtn(){
+  const active=files.filter(f=>f&&!f.removed&&!f.detecting);
+  const btn=document.getElementById('scanBtn');
+  const cnt=document.getElementById('scanCount');
+  btn.disabled=active.length===0;
+  cnt.textContent=active.length?`${active.length} resume${active.length>1?'s':''} ready · GitHub auto-detected`:'';
+}
+
+// ── SCAN ──────────────────────────────────────────────────────────
+async function runScan(){
+  const active=files.filter(f=>f&&!f.removed&&!f.detecting);
+  if(!active.length) return;
+  const ld=document.getElementById('loading');
+  ld.classList.add('active');
+  const steps=['ls0','ls1','ls2','ls3','ls4'];
+  for(let i=0;i<active.length;i++){
+    document.getElementById('ld-file').textContent=`(${i+1}/${active.length}) ${active[i].name}`;
+    steps.forEach(s=>{document.getElementById(s).className='loader-step'});
+    for(let s=0;s<steps.length;s++){
+      const el=document.getElementById(steps[s]);
+      el.className='loader-step active';
+      await wait(480+Math.random()*280);
+      el.className='loader-step done';
+    }
+    if(i<active.length-1) await wait(250);
+  }
+  await wait(300);
+  ld.classList.remove('active');
+  showResults();
+}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+// ── RESULTS ───────────────────────────────────────────────────────
+function showResults(){
+  const sec=document.getElementById('results-section');
+  sec.style.display='block';
+  sec.scrollIntoView({behavior:'smooth',block:'start'});
+  document.getElementById('res-ts').textContent=new Date().toLocaleTimeString()+' · '+new Date().toLocaleDateString();
+
+  const tabs=document.getElementById('cTabs');
+  const panels=document.getElementById('cPanels');
+  tabs.innerHTML=''; panels.innerHTML='';
+
+  CANDIDATES.forEach((c,i)=>{
+    const tab=document.createElement('div');
+    tab.className='cand-tab'+(i===0?' active':'');
+    tab.id='tab-'+i;
+    tab.innerHTML=`${c.name} <span class="score-badge">${c.score}/100</span>`;
+    tab.onclick=()=>switchTab(i);
+    tabs.appendChild(tab);
+
+    const panel=document.createElement('div');
+    panel.className='cand-panel'+(i===0?' active':'');
+    panel.id='panel-'+i;
+    panel.innerHTML=buildPanel(c,i);
+    panels.appendChild(panel);
+  });
+
+  setTimeout(()=>animatePanel(0),120);
+}
+
+function switchTab(i){
+  document.querySelectorAll('.cand-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.cand-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  animatePanel(i);
+}
+
+function animatePanel(i){
+  const panel=document.getElementById('panel-'+i);
+  const bar=panel.querySelector('.track-fill');
+  if(bar) setTimeout(()=>{bar.style.width=bar.dataset.w},80);
+  panel.querySelectorAll('.card,.ai-box').forEach((el,j)=>{
+    setTimeout(()=>el.classList.add('visible'),160+j*90);
+  });
+  buildHeatmap(CANDIDATES[i]);
+}
+
+function buildPanel(c,idx){
+  const vCount=c.claims.filter(x=>x.v==='verified').length;
+  const badCount=c.claims.filter(x=>x.v==='missing'||x.v==='inflated').length;
+
+  const claimRows=c.claims.map(cl=>{
+    const vCls={verified:'vv',partial:'vp',inflated:'vi',missing:'vm',bonus:'vb'}[cl.v];
+    const vLbl={verified:'✓ Verified',partial:'⚡ Partial',inflated:'⚠ Inflated',missing:'✗ No evidence',bonus:'★ Bonus find'}[cl.v];
+    const dotColor=cl.conf>=4?'on-green':cl.conf>=2?'on-warn':'on-red';
+    const dots=Array.from({length:5},(_,k)=>`<div class="conf-dot${k<cl.conf?' '+dotColor:''}"></div>`).join('');
+    const evHTML=cl.ev.length
+      ? cl.ev.map(e=>`<div class="ev-item"><span style="color:var(--accent2)">→</span><span class="ev-link">${e}</span></div>`).join('')
+      : `<div class="no-ev">— No matching repos or commits found</div>`;
+    return `<tr>
+      <td><div class="cat-pill">${cl.cat}</div><div class="claim-main">${cl.text}</div><div class="claim-quote">${cl.quote}</div></td>
+      <td>${evHTML}</td>
+      <td style="text-align:center"><div class="conf-dots" style="justify-content:center">${dots}</div></td>
+      <td><div class="v-chip ${vCls}">${vLbl}</div></td>
+    </tr>`;
+  }).join('');
+
+  const skillRows=c.skills.map(s=>{
+    const col={verified:'var(--accent)',partial:'var(--warn)',inflated:'var(--accent3)',missing:'var(--muted)'}[s.v]||'var(--muted)';
+    const lbl={verified:'✓ verified',partial:'⚡ partial',inflated:'⚠ inflated',missing:'✗ missing'}[s.v]||'';
+    return `<div class="skill-row">
+      <div class="s-name">${s.n}</div>
+      <div class="s-track"><div class="s-fill" style="width:${s.gp}%;background:${col};opacity:.85"></div></div>
+      <div class="s-pct" style="color:${col}">${s.gp}%</div>
+      <div class="s-v" style="color:${col}">${lbl}</div>
+    </div>`;
+  }).join('');
+
+  const repoRows=c.repos.map(r=>{
+    const tags=r.m.map(t=>`<div class="r-tag m">${t}</div>`).join('')||'<div class="r-tag">no claim match</div>';
+    return `<div class="repo-row">
+      <div><div class="r-name">${r.n}</div><div class="r-sub">${r.l} · ★${r.s} · ${r.mo}mo active</div></div>
+      <div class="r-tags">${tags}</div>
+    </div>`;
+  }).join('');
+
+  const flagHTML=c.flags.map(f=>`<div class="flag-item ${f.t}">
+    <div class="flag-icon">${f.icon}</div>
+    <div><div class="flag-title">${f.title}</div><div class="flag-desc">${f.desc}</div></div>
+  </div>`).join('');
+
+  return `
+  <div class="top-score-bar">
+    <div>
+      <div class="score-meta">
+        <span>🔗 github.com/${c.github}</span>
+        <span>📦 ${c.repos} repos</span>
+        <span>🔥 ${c.commits} commits/yr</span>
+        <span>⭐ ${c.stars} stars</span>
+        <span>📅 ${c.activeMo}mo active</span>
+      </div>
+      <div class="big-num">${vCount}<span>/${c.claims.length}</span></div>
+      <div class="big-label">claims independently verified</div>
+      <div class="score-track-row">
+        <div class="track-labels"><span>Credibility score</span><span>${c.score}/100</span></div>
+        <div class="track"><div class="track-fill" data-w="${c.score}%" style="width:0"></div></div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="verdict-big ${c.verdictCls}">${c.verdict}</div>
+      <div style="font-size:.67rem;color:var(--muted);margin-top:4px">${badCount} claim${badCount!==1?'s':''} unverified or inflated</div>
+      <a class="gh-link-sm" href="https://github.com/${c.github}" target="_blank">↗ github.com/${c.github}</a>
+    </div>
+  </div>
+
+  <div class="sec-title">Claims Audit <span class="sec-count">${c.claims.length} claims extracted from resume</span></div>
+  <div class="claims-wrap">
+    <table class="claims-table">
+      <thead><tr>
+        <th style="width:30%">Claim (from resume)</th>
+        <th style="width:38%">GitHub Evidence</th>
+        <th style="width:12%;text-align:center">Confidence</th>
+        <th style="width:20%">Verdict</th>
+      </tr></thead>
+      <tbody>${claimRows}</tbody>
+    </table>
+  </div>
+
+  <div class="ai-box">
+    <div class="card-hd"><div class="card-lbl">🤖 AI Audit Summary</div></div>
+    <div class="ai-body">${c.summary}</div>
+  </div>
+
+  <div class="lower-grid">
+    <div class="card">
+      <div class="card-hd"><div class="card-lbl">📊 Skill Claim vs Evidence</div></div>
+      <div class="skill-rows">${skillRows}</div>
+    </div>
+    <div class="card" style="transition-delay:.1s">
+      <div class="card-hd"><div class="card-lbl">📦 Top Repos · Claim Matches</div></div>
+      <div class="repo-list">${repoRows}</div>
+    </div>
+    <div class="card" style="transition-delay:.2s">
+      <div class="card-hd"><div class="card-lbl">📅 Contribution Activity</div></div>
+      <div class="heatmap" id="hm-${idx}"></div>
+      <div class="hm-sub"><span>6 months ago</span><span>Today</span></div>
+      <div class="stat-row">
+        <div class="stat">Commits <strong>${c.commits}/yr</strong></div>
+        <div class="stat">Active <strong>${c.activeMo}mo</strong></div>
+        <div class="stat">Stars <strong>${c.stars}</strong></div>
+      </div>
+    </div>
+    <div class="card" style="transition-delay:.3s">
+      <div class="card-hd"><div class="card-lbl">🚩 Flags &amp; Standouts</div></div>
+      <div class="flag-list">${flagHTML}</div>
+    </div>
+  </div>`;
+}
+
+function buildHeatmap(c){
+  // find by position — slightly deferred so DOM is ready
+  setTimeout(()=>{
+    CANDIDATES.forEach((cand,i)=>{
+      const hm=document.getElementById('hm-'+i);
+      if(!hm||hm.children.length>0) return;
+      const lvls=[0,1,1,2,3,4,2,1,0,1,2,3,4,3,2,1,0,2,3,4,4,3,2,1,3,2];
+      hm.innerHTML='';
+      for(let r=0;r<7;r++)
+        for(let c2=0;c2<26;c2++){
+          const el=document.createElement('div');
+          el.className='hm';
+          const v=Math.max(0,Math.min(4,lvls[c2]+Math.floor(Math.random()*3)-1));
+          if(v>0) el.classList.add('l'+v);
+          hm.appendChild(el);
+        }
+    });
+  },60);
+}
+</script>
+</body>
+</html>
