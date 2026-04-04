@@ -1,0 +1,20 @@
+query getAuditData($login: String!) {
+  user(login: $login) {
+    name
+    bio
+    avatarUrl
+    repositories(first: 50, orderBy: {field: STARGAZERS, direction: DESC}) {
+      nodes {
+        name
+        description
+        stargazerCount
+        forkCount
+        primaryLanguage {
+          name
+        }
+        url
+        updatedAt
+      }
+    }
+  }
+}

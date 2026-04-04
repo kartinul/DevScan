@@ -50,11 +50,11 @@ export function useFileUpload() {
 
 // ─── Scan Flow Hook ──────────────────────────────────────────────────────────
 export const SCAN_STEPS = [
-  "Parse resume & extract all claims",
-  "Auto-detect GitHub from resume",
-  "Fetch repos, commits & history",
-  "Cross-reference every claim",
-  "Generate credibility report",
+  "OCR: Extracting resume text",
+  "Analyzing resume structure",
+  "GraphQL: Fetching GitHub evidence",
+  "AI: Cross-referencing claims",
+  "Generating audit report",
 ];
 
 export function useScanFlow() {
