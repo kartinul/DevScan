@@ -1,6 +1,6 @@
 import { Candidate } from "../types";
 import { fetchGitHubData } from "./github";
-import { analyzeWithAI, askGptOSS, askLiquidThinking, askQwen } from "./ai";
+import { analyzeWithAI } from "./ai";
 import { extractTextFromFile } from "./ocr";
 import { askChatGPT, askGemini, askGroq } from "./aiEngine";
 

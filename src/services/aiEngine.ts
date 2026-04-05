@@ -87,3 +87,47 @@ export async function askGroq(prompt: string): Promise<string> {
   if (!answer) throw new Error("No content returned from Groq");
   return answer;
 }
+
+// ─── OpenRouter (Free Models) ───────────────────────────────────────────────
+async function askOpenRouter(prompt: string, model: string): Promise<string> {
+  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const response = await fetch(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      `OpenRouter error ${response.status}: ${error.error?.message ?? "Unknown error"}`,
+    );
+  }
+
+  const data = await response.json();
+  const answer = data.choices?.[0]?.message?.content;
+  if (!answer) throw new Error(`No content returned from ${model}`);
+  return answer;
+}
+
+export async function askGptOSS(prompt: string): Promise<string> {
+  return askOpenRouter(prompt, "openai/gpt-oss-120b:free");
+}
+
+export async function askLiquidThinking(prompt: string): Promise<string> {
+  return askOpenRouter(prompt, "liquid/lfm-2.5-1.2b-thinking:free");
+}
+
+export async function askQwen(prompt: string): Promise<string> {
+  return askOpenRouter(prompt, "qwen/qwen3.6-plus:free");
+}
+
