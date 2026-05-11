@@ -12,8 +12,9 @@ import { extractTextFromFile } from "./ocr";
 export function detectGitHubUserFromText(text: string): string | null {
   // Regex explanation:
   // (?:github\.com\/) -> look for "github.com/" but don't capture it
+  // (?!orgs|settings|marketplace) -> exclude common internal GitHub paths
   // ([a-zA-Z0-9-]{1,39}) -> capture the username (alphanumeric and hyphens, max 39 chars per GH rules)
-  const regex = /(?:github\.com\/)([a-zA-Z0-9-]{1,39})/i;
+  const regex = /(?:github\.com\/)(?!orgs\/|settings\/|marketplace\/)([a-zA-Z0-9-]{1,39})/i;
   const match = text.match(regex);
   
   if (match && match[1]) {
@@ -21,7 +22,9 @@ export function detectGitHubUserFromText(text: string): string | null {
   }
 
   // Fallback for @username format
-  const twitterStyleRegex = /(?:^|\s)@([a-zA-Z0-9-]{1,39})/i;
+  // We want standalone @username, not part of an email.
+  // Lookbehind for space or start of string, capture alphanumeric, lookahead ensures no dot (like @gmail.com)
+  const twitterStyleRegex = /(?:^|\s)@([a-zA-Z0-9-]{1,39})(?!\.[a-zA-Z])/i;
   const twitterMatch = text.match(twitterStyleRegex);
   
   return twitterMatch ? twitterMatch[1] : null;

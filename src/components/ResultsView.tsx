@@ -100,13 +100,15 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
         boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
         zIndex: 50,
       }}>
-        <button onClick={handlePrev} disabled={currentIndex <= 0} style={{ background: 'none', border: 'none', color: currentIndex <= 0 ? colors.border : colors.muted, cursor: currentIndex <= 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
+        <button onClick={handlePrev} disabled={currentIndex <= 0} aria-label="Previous Candidate" title="Previous Candidate" style={{ background: 'none', border: 'none', color: currentIndex <= 0 ? colors.border : colors.muted, cursor: currentIndex <= 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
           <ChevronLeft size={20} />
         </button>
 
         <div style={{ display: 'flex', gap: 8 }}>
           <button 
             onClick={() => onDecide(activeId, 'rejected')}
+            aria-label="Reject Candidate"
+            title="Reject Candidate"
             style={{ 
               background: decisions[activeId] === 'rejected' ? 'rgba(247,129,102,.15)' : colors.surface2, 
               border: `1px solid ${decisions[activeId] === 'rejected' ? colors.accent3 : colors.border}`,
@@ -117,6 +119,8 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
           </button>
           <button 
             onClick={() => onDecide(activeId, 'accepted')}
+            aria-label="Accept Candidate"
+            title="Accept Candidate"
             style={{ 
               background: decisions[activeId] === 'accepted' ? 'rgba(57,211,83,.15)' : colors.surface2, 
               border: `1px solid ${decisions[activeId] === 'accepted' ? colors.accent : colors.border}`,
@@ -127,7 +131,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
           </button>
         </div>
 
-        <button onClick={handleNext} disabled={currentIndex >= candidates.length - 1} style={{ background: 'none', border: 'none', color: currentIndex >= candidates.length - 1 ? colors.border : colors.muted, cursor: currentIndex >= candidates.length - 1 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
+        <button onClick={handleNext} disabled={currentIndex >= candidates.length - 1} aria-label="Next Candidate" title="Next Candidate" style={{ background: 'none', border: 'none', color: currentIndex >= candidates.length - 1 ? colors.border : colors.muted, cursor: currentIndex >= candidates.length - 1 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
           <ChevronRight size={20} />
         </button>
 
@@ -241,25 +245,7 @@ const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) =
       </div>
     </div>
 
-    {/* Mock Data Indicator */}
-    {candidate.mock && (
-      <div style={{ 
-        marginTop: 32, 
-        padding: "8px 12px", 
-        border: `1px solid ${colors.border}`, 
-        borderRadius: 6, 
-        fontSize: ".65rem", 
-        color: colors.muted,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        background: "rgba(255,255,255,.02)",
-        width: "fit-content"
-      }}>
-        <Info size={12} />
-        This report is based on demo data (Mock GitHub/AI response)
-      </div>
-    )}
+    {/* Mock Data Indicator Removed as requested */}
   </div>
 );
 

@@ -1,11 +1,7 @@
 import { Candidate, GitHubData } from "../types";
-import { MOCK_CANDIDATES } from "../data";
-import { askGemini, askGroq } from "./aiEngine";
+import { askGeminiWithFallback } from "./aiEngine";
 // @ts-ignore - Vite raw import
 import AUDIT_PROMPT from "./prompt.txt?raw";
-
-// ─── TESTING ONLY: Toggle for manual console input ──────────────────────────
-const USE_MANUAL_INPUT = true;
 
 /**
  * Analyze resume claims against GitHub evidence using AI logic.
@@ -23,31 +19,12 @@ export async function analyzeWithAI(
 
     console.log("[AI] Prompt prepared (length):", finalPrompt.length);
 
-    // ─── MANUAL INPUT MODE (TESTING) ───
-    if (USE_MANUAL_INPUT) {
-      console.warn("⚠️ [AI] MANUAL INPUT MODE ENABLED");
-      console.log(
-        "[AI] Waiting for result... Run this in your console to continue:",
-      );
-      console.log(
-        `%cwindow.setAIResult({ ...your_json_here })`,
-        "color: #39d353; font-weight: bold; font-family: monospace;",
-      );
-
-      return new Promise((resolve) => {
-        (window as any).setAIResult = (manualResult: Candidate) => {
-          console.log("[AI] Manual result received via console.");
-          resolve(manualResult);
-        };
-      });
-    }
-
     // ─── REAL AI CALL ───
-    console.log("[AI] Calling Groq...");
-    const responseText = await askGroq(finalPrompt);
+    console.log("[AI] Calling Gemini...");
+    const responseText = await askGeminiWithFallback(finalPrompt);
 
-    // Clean up response
-    const cleanJson = responseText.replace(/```json|```/g, "").trim();
+    // Clean up response: remove markdown code block delimiters and any language tags
+    const cleanJson = responseText.replace(/```[a-zA-Z]*\n?|```/gi, "").trim();
     const aiResult = JSON.parse(cleanJson);
 
     console.log("[AI] Successfully parsed response.");

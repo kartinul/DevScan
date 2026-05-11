@@ -16,8 +16,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
   console.log(`[Parser] Processing PDF: ${file.name}`);
 
   if (file.type !== "application/pdf") {
-    console.error("[Parser] Only PDF files are supported.");
-    return "";
+    throw new Error(`[Parser] Unsupported file type: ${file.type}. Only PDF files are supported.`);
   }
 
   try {

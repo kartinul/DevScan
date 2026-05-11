@@ -26,5 +26,7 @@ export async function downloadFilesAsZip(files: File[], zipName: string = "accep
   
   // Cleanup
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }

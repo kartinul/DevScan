@@ -15,8 +15,8 @@ export function useFileUpload() {
       const existing = new Set(prev.map((f) => f.name));
       const newFiles: UploadedFile[] = incoming
         .filter((f) => !existing.has(f.name))
-        .map((f, offset) => ({
-          id: Date.now() + offset,
+        .map((f) => ({
+          id: Date.now() + Math.floor(Math.random() * 1000000),
           name: f.name,
           size: f.size,
           github: null,
@@ -27,15 +27,26 @@ export function useFileUpload() {
     });
 
     incoming.forEach((f, offset) => {
-      detectGitHubUser(f, offset).then((username) => {
-        setFiles((prev) =>
-          prev.map((item) =>
-            item.name === f.name && item.detecting
-              ? { ...item, detecting: false, github: username }
-              : item,
-          ),
-        );
-      });
+      detectGitHubUser(f, offset)
+        .then((username) => {
+          setFiles((prev) =>
+            prev.map((item) =>
+              item.name === f.name && item.detecting
+                ? { ...item, detecting: false, github: username }
+                : item,
+            ),
+          );
+        })
+        .catch((error) => {
+          console.error("Detection failed:", error);
+          setFiles((prev) =>
+            prev.map((item) =>
+              item.name === f.name && item.detecting
+                ? { ...item, detecting: false, github: null }
+                : item,
+            ),
+          );
+        });
     });
   }, []);
 

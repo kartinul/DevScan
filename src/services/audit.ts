@@ -2,7 +2,6 @@ import { Candidate } from "../types";
 import { fetchGitHubData } from "./github";
 import { analyzeWithAI } from "./ai";
 import { extractTextFromFile } from "./ocr";
-import { askChatGPT, askGemini, askGroq } from "./aiEngine";
 
 /**
  * Orchestrator that performs the full audit flow.
@@ -13,17 +12,9 @@ export async function performFullAudit(
   fileIndex: number,
   onStep: (step: number) => void,
 ): Promise<Candidate> {
-  // const res = await askChatGPT("hi");
-  // const res = await askGemini("hi");
-  // const res = await askQwen("hi");
-  // console.log(res);
-
-  // console.log(gqtest);
-
   // 1. Parsing & OCR step
   onStep(0);
   const extractedText = await extractTextFromFile(file);
-  console.log(extractedText);
 
   // 2. Detection (already passed from the hook, adding mock delay)
   onStep(1);
@@ -33,12 +24,13 @@ export async function performFullAudit(
   onStep(2);
   const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
   const githubData = await fetchGitHubData(githubUsername, githubToken);
-  console.log(githubData);
-  console.log(JSON.stringify(githubData));
 
   // 4. Cross-reference claims (AI Step)
   onStep(3);
   const aiResult = await analyzeWithAI(extractedText, githubData, fileIndex);
+
+  // Ensure aiResult is a valid object before spreading
+  const safeAiResult = aiResult && typeof aiResult === 'object' ? aiResult : {};
 
   const result: Candidate = {
     // Default fallback values if AI omits them
@@ -54,17 +46,17 @@ export async function performFullAudit(
     summary: [],
 
     // Fill in AI fields, overriding defaults
-    ...(aiResult as any),
+    ...(safeAiResult as Partial<Candidate>),
 
     // Override session-specific ones
     id: String(Date.now() + fileIndex),
     filename: file.name,
     github: githubData.username,
     file: file,
-    mock: (aiResult as any).mock || githubData.mock || false,
+    mock: (safeAiResult as any).mock || githubData.mock || false,
   };
 
-  console.log(result);
+  console.log("[Audit] Final result prepared.");
 
   // 5. Finalize report
   onStep(4);
