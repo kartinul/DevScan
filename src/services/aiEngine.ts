@@ -137,8 +137,11 @@ export async function askGeminiWithFallback(prompt: string): Promise<string> {
           console.warn(`[AI] RPM rate limit hit for ${model} on key ${maskedKey}. Cooling down for 60s.`);
         }
       } else if (response.status === 503) {
-        data.cooldownUntil = Date.now() + 15 * 1000;
-        console.warn(`[AI] Server overloaded for ${model} on key ${maskedKey}. Cooling down for 15s.`);
+        // 503 means the model itself is overloaded, apply cooldown to ALL keys for this model
+        for (const k of API_KEYS) {
+          usageState[k][model].cooldownUntil = Date.now() + 60 * 1000;
+        }
+        console.warn(`[AI] Server overloaded for ${model}. Cooling down all keys for 60s.`);
       }
 
       lastError = new Error(`Gemini API Error [${response.status}]: ${errorText}`);
