@@ -84,7 +84,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
         </button>
       </div>
 
-      {/* Fixed Action Bar */}
+      {}
       <div style={{
         position: 'fixed',
         bottom: 24,
@@ -105,24 +105,24 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
         </button>
 
         <div style={{ display: 'flex', gap: 8 }}>
-          <button 
+          <button
             onClick={() => onDecide(activeId, 'rejected')}
             aria-label="Reject Candidate"
             title="Reject Candidate"
-            style={{ 
-              background: decisions[activeId] === 'rejected' ? 'rgba(247,129,102,.15)' : colors.surface2, 
+            style={{
+              background: decisions[activeId] === 'rejected' ? 'rgba(247,129,102,.15)' : colors.surface2,
               border: `1px solid ${decisions[activeId] === 'rejected' ? colors.accent3 : colors.border}`,
               color: decisions[activeId] === 'rejected' ? colors.accent3 : colors.muted,
               borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s'
             }}>
             <X size={20} />
           </button>
-          <button 
+          <button
             onClick={() => onDecide(activeId, 'accepted')}
             aria-label="Accept Candidate"
             title="Accept Candidate"
-            style={{ 
-              background: decisions[activeId] === 'accepted' ? 'rgba(57,211,83,.15)' : colors.surface2, 
+            style={{
+              background: decisions[activeId] === 'accepted' ? 'rgba(57,211,83,.15)' : colors.surface2,
               border: `1px solid ${decisions[activeId] === 'accepted' ? colors.accent : colors.border}`,
               color: decisions[activeId] === 'accepted' ? colors.accent : colors.muted,
               borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s'
@@ -150,7 +150,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
 
 const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) => (
   <div>
-    {/* Score Header */}
+    {}
     <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 12, padding: 24, marginBottom: 32 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 16 }}>
         <div>
@@ -172,13 +172,13 @@ const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) =
       </div>
     </div>
 
-    {/* AI Summary */}
+    {}
     <div style={{ marginBottom: 32, lineHeight: 1.8, fontSize: ".85rem", color: colors.muted }}>
       {candidate.summary.map((part, i) => (
-        <span key={i} style={{ 
-          color: part.type === "bold" ? colors.text : 
-                 part.type === "green" ? colors.accent : 
-                 part.type === "red" ? colors.accent3 : 
+        <span key={i} style={{
+          color: part.type === "bold" ? colors.text :
+                 part.type === "green" ? colors.accent :
+                 part.type === "red" ? colors.accent3 :
                  part.type === "warn" ? colors.warn : "inherit",
           fontWeight: part.type === "bold" ? 700 : "inherit",
           display: part.type === "break" ? "block" : "inline",
@@ -189,7 +189,7 @@ const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) =
       ))}
     </div>
 
-    {/* Claims Audit */}
+    {}
     <div style={{ marginBottom: 40 }}>
       <div style={{ fontSize: ".65rem", textTransform: "uppercase", letterSpacing: ".1em", color: colors.muted, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
         Claims Audit ({candidate.claims.length})
@@ -214,7 +214,7 @@ const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) =
       </div>
     </div>
 
-    {/* Grid for Skills & Flags */}
+    {}
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: 24, marginBottom: 48 }}>
       <div>
         <div style={{ fontSize: ".65rem", textTransform: "uppercase", letterSpacing: ".1em", color: colors.muted, marginBottom: 16 }}>Skills & Evidence</div>
@@ -245,7 +245,7 @@ const CandidateDashboard: React.FC<{ candidate: Candidate }> = ({ candidate }) =
       </div>
     </div>
 
-    {/* Mock Data Indicator Removed as requested */}
+    {}
   </div>
 );
 

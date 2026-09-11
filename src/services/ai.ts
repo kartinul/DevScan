@@ -3,9 +3,6 @@ import { askGeminiWithFallback } from "./aiEngine";
 // @ts-ignore - Vite raw import
 import AUDIT_PROMPT from "./prompt.txt?raw";
 
-/**
- * Analyze resume claims against GitHub evidence using AI logic.
- */
 export async function analyzeWithAI(
   extractedText: string,
   githubData: GitHubData,
@@ -19,11 +16,9 @@ export async function analyzeWithAI(
 
     console.log("[AI] Prompt prepared (length):", finalPrompt.length);
 
-    // ─── REAL AI CALL ───
     console.log("[AI] Calling Gemini...");
     const responseText = await askGeminiWithFallback(finalPrompt);
 
-    // Clean up response: remove markdown code block delimiters and any language tags
     const cleanJson = responseText.replace(/```[a-zA-Z]*\n?|```/gi, "").trim();
     const aiResult = JSON.parse(cleanJson);
 

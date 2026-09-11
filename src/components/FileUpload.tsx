@@ -128,7 +128,7 @@ const FileItem: React.FC<{ file: UploadedFile, onRemove: () => void, onEditGH: (
               <CheckCircle size={10} /> Ready
             </span>
           )}
-          
+
           {editing ? (
             <input
               autoFocus

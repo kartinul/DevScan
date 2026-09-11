@@ -30,7 +30,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ active, currentF
           }}
         >
           <div style={{ display: "inline-block", width: 52, height: 52, borderRadius: "50%", border: `3px solid ${colors.border}`, borderTopColor: colors.accent, animation: "spin .8s linear infinite", marginBottom: 24 }} />
-          
+
           <Progress.Root
             value={progressValue}
             style={{ position: "relative", overflow: "hidden", background: colors.surface2, borderRadius: 10, width: "100%", height: 6, marginBottom: 32 }}

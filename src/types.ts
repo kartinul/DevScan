@@ -1,7 +1,5 @@
-// ─── Verdict ────────────────────────────────────────────────────────────────
 export type Verdict = "verified" | "partial" | "inflated" | "missing" | "bonus";
 
-// ─── Claim ──────────────────────────────────────────────────────────────────
 export interface Claim {
   category: string;
   text: string;
@@ -11,7 +9,6 @@ export interface Claim {
   evidence: string[];
 }
 
-// ─── Skill ──────────────────────────────────────────────────────────────────
 export interface Skill {
   name: string;
   resumePct: number;
@@ -19,7 +16,6 @@ export interface Skill {
   verdict: Verdict;
 }
 
-// ─── Repo ───────────────────────────────────────────────────────────────────
 export interface Repo {
   name: string;
   lang: string;
@@ -28,7 +24,6 @@ export interface Repo {
   claimMatches: string[];
 }
 
-// ─── Flag ───────────────────────────────────────────────────────────────────
 export type FlagType = "red" | "green" | "warn";
 
 export interface Flag {
@@ -37,7 +32,6 @@ export interface Flag {
   desc: string;
 }
 
-// ─── AI Summary ──────────────────────────────────────────────────────────────
 export type SummaryPartType =
   | "text"
   | "bold"
@@ -51,7 +45,6 @@ export interface SummaryPart {
   content?: string;
 }
 
-// ─── Candidate ──────────────────────────────────────────────────────────────
 export interface CandidateStats {
   commits: number;
   repos: number;
@@ -77,7 +70,6 @@ export interface Candidate {
   file?: File;
 }
 
-// ─── Uploaded File ───────────────────────────────────────────────────────────
 export interface UploadedFile {
   id: number;
   name: string;
@@ -87,7 +79,6 @@ export interface UploadedFile {
   file: File;
 }
 
-// ─── GitHub Data ─────────────────────────────────────────────────────────────
 export interface GitHubRepo {
   name: string;
   description: string | null;
@@ -111,7 +102,6 @@ export interface GitHubData {
   mock?: boolean;
 }
 
-// ─── Scan State ─────────────────────────────────────────────────────────────
 export interface ScanState {
   fileIndex: number;
   currentFile: string;

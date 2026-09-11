@@ -28,7 +28,7 @@ const App: React.FC = () => {
       .filter(c => decisions[c.id] === 'accepted')
       .map(c => c.file)
       .filter((f): f is File => f !== undefined);
-    
+
     if (acceptedFiles.length > 0) {
       downloadFilesAsZip(acceptedFiles);
     }
@@ -45,12 +45,12 @@ const App: React.FC = () => {
 
   return (
     <div style={{ background: colors.bg, color: colors.text, minHeight: "100vh", position: "relative" }}>
-      {/* Background Grid */}
+      {}
       <div style={{ position: "fixed", inset: 0, backgroundImage: `linear-gradient(rgba(57,211,83,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(57,211,83,.03) 1px,transparent 1px)`, backgroundSize: "40px 40px", pointerEvents: "none", zIndex: 0 }} />
 
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "0 24px 100px" }}>
         <AuditHeader />
-        
+
         {!done && (
           <>
             <AuditHero />
@@ -82,10 +82,10 @@ const App: React.FC = () => {
 
         {done && results.length > 0 && (
           <div ref={resultsRef}>
-            <ResultsView 
-              candidates={results} 
-              activeId={activeId} 
-              onSelect={setActiveId} 
+            <ResultsView
+              candidates={results}
+              activeId={activeId}
+              onSelect={setActiveId}
               decisions={decisions}
               onDecide={(id, decision) => setDecisions(prev => ({...prev, [id]: decision}))}
               onDownload={handleDownload}

@@ -3,7 +3,6 @@ import type { UploadedFile, ScanState, Candidate } from "./types";
 import { detectGitHubUser } from "./services/github";
 import { performFullAudit } from "./services/audit";
 
-// ─── File Upload Hook ────────────────────────────────────────────────────────
 export function useFileUpload() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
 
@@ -62,7 +61,6 @@ export function useFileUpload() {
   return { files, addFiles, removeFile, editGH, readyFiles };
 }
 
-// ─── Scan Flow Hook ──────────────────────────────────────────────────────────
 export const SCAN_STEPS = [
   "OCR: Extracting resume text",
   "Analyzing resume structure",

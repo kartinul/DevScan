@@ -1,6 +1,3 @@
-/**
- * AI Engine: Implementation for Gemini with load-balancing fallback.
- */
 
 const MODELS = [
   "gemini-3.8-flash",
@@ -46,7 +43,7 @@ function initUsageState() {
       };
     }
   }
-  
+
   isInitialized = true;
   console.log(`[AI] Engine initialized. Loaded ${API_KEYS.length} API keys.`);
 }
@@ -91,11 +88,11 @@ export async function askGeminiWithFallback(prompt: string): Promise<string> {
       if (!lastError) {
         throw new Error("Rate Limit Hit: All Gemini keys and models are currently maxed out or cooling down.");
       }
-      break; // Exit loop to throw last error
+      break;
     }
-    
+
     const { key, model } = slot;
-    
+
     const data = usageState[key][model];
     data.timestamps.push(Date.now());
     data.dayCount += 1;
@@ -128,9 +125,9 @@ export async function askGeminiWithFallback(prompt: string): Promise<string> {
       } catch {
         errorText = await response.text();
       }
-      
+
       console.error(`[AI] Google API Error [${response.status}]: ${errorText}`);
-      
+
       if (response.status === 429) {
         if (errorText.includes("PerDay")) {
           data.cooldownUntil = Date.now() + 86400 * 1000;
