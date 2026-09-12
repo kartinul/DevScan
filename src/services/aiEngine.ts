@@ -25,11 +25,11 @@ let isInitialized = false;
 function initUsageState() {
   if (isInitialized) return;
 
-  const rawKeys = import.meta.env.VITE_GEMINI_API_KEYS || "";
+  const rawKeys = import.meta.env.GEMINI_API_KEYS || "";
   API_KEYS = rawKeys.split(",").map((k: string) => k.trim()).filter(Boolean);
 
   if (!API_KEYS.length) {
-    throw new Error("No keys found! Set VITE_GEMINI_API_KEYS=\"key1,key2,key3\" in .env");
+    throw new Error("No keys found! Set GEMINI_API_KEYS=\"key1,key2,key3\" in .env");
   }
 
   for (const key of API_KEYS) {

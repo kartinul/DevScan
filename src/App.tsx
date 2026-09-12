@@ -70,8 +70,7 @@ const App: React.FC = () => {
                   padding: "14px 44px",
                   cursor: readyFiles.length > 0 ? "pointer" : "not-allowed",
                   transition: "all .2s",
-                  opacity: readyFiles.length > 0 ? 1 : 0.35,
-                  boxShadow: readyFiles.length > 0 ? `0 8px 24px rgba(57, 211, 83, 0.2)` : "none"
+                  opacity: readyFiles.length > 0 ? 1 : 0.35
                 }}
               >
                 ⌬ &nbsp;Audit {readyFiles.length > 0 ? readyFiles.length : ""} Resumes
@@ -101,7 +100,6 @@ const App: React.FC = () => {
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
           @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-          @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
           .spin { animation: spin 1s linear infinite; }
         `}
       </style>

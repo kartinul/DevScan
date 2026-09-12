@@ -37,8 +37,8 @@ bun install
 Create a `.env` file in the root:
 
 ```env
-VITE_GITHUB_TOKEN=your_ghp_token
-VITE_GEMINI_API_KEY=AIza...
+GITHUB_TOKEN=your_ghp_token
+GEMINI_API_KEY=AIza...
 ```
 
 ### Development

@@ -29,7 +29,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
     <div style={{ animation: "fadeIn .6s ease" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
         <div style={{ fontFamily: fonts.display, fontWeight: 800, fontSize: "1.5rem", display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: colors.accent, boxShadow: `0 0 8px ${colors.accent}`, animation: "pulse 2s infinite" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: colors.accent }} />
           Audit Report
         </div>
         <div style={{ fontSize: ".7rem", color: colors.muted }}>
@@ -97,7 +97,6 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ candidates, activeId, 
         display: 'flex',
         alignItems: 'center',
         gap: 16,
-        boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
         zIndex: 50,
       }}>
         <button onClick={handlePrev} disabled={currentIndex <= 0} aria-label="Previous Candidate" title="Previous Candidate" style={{ background: 'none', border: 'none', color: currentIndex <= 0 ? colors.border : colors.muted, cursor: currentIndex <= 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>

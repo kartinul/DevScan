@@ -16,7 +16,7 @@ export async function performFullAudit(
   await new Promise((resolve) => setTimeout(resolve, 300));
 
   onStep(2);
-  const githubToken = import.meta.env.VITE_GITHUB_TOKEN;
+  const githubToken = import.meta.env.GITHUB_TOKEN;
   const githubData = await fetchGitHubData(githubUsername, githubToken);
 
   onStep(3);
